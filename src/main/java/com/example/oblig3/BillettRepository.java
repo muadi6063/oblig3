@@ -23,7 +23,7 @@ public class BillettRepository {
 
 
     public List<Billett> hentAlle() {
-        String sql = "SELECT * FROM Billett";
+        String sql = "SELECT * FROM Billett ORDER BY etternavn";
         return db.query(sql, new BeanPropertyRowMapper(Billett.class));
     }
     public void slettAlle() {
