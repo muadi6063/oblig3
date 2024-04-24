@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+
+        $(function (){
+            hentAlle();
+        })
+        function kjopBillett() {
+            $("#fornavnFeil").html("");
+            $("#etternavnFeil").html("");
+            $("#antallFeil").html("");
+            $("#filmFeil").html("");
+            $("#epostFeil").html("");
+            $("#telefonFeil").html("");
+
+            let test = true;
+
+            let fornavn = $("#fornavn").val();
+            if (fornavn === "") {
+                $("#fornavnFeil").html("det må skrives inn fornavn");
+                test = false;
+            }
+            let etternavn = $("#etternavn").val();
+            if (etternavn === "") {
+                $("#etternavnFeil").html("det må skrives inn etternavn");
+                test = false;
+            }
+
+            let antall = $("#antall").val();
+            if (antall === "" || antall <= 0 || isNaN(parseInt(antall))) {
+                $("#antallFeil").html("Det må skrives inn antall");
+                test = false;
+            }
+
+            let film = $("#film").val();
+            if (film === "-1") {
+                $("#filmFeil").html("Du må velge film");
+                test = false;
+            }
+
+            let epost = $("#epost").val();
+            if (epost === "") {
+                $("#epostFeil").html("Det må skrives inn epost");
+                test = false;
+            }
+            else if (!validerEpost(epost)) {
+                $("#epostFeil").html("Det må skrives riktig epost");
+                test = false;
+            }
+
+            let telefonnummer = $("#telefonnr").val();
+            if (telefonnummer === "") {
+                $("#telefonFeil").html("det må skrives inn telefonnummer");
+                test = false;
+            }
+            else if (!validerTelefonNr(telefonnummer)) {
+                $("#telefonFeil").html("Skriv inn nummer på åtte siffer");
+                test = false;
+            }
+
+            if (test) {
+                const billett = {
+                    fornavn: $("#fornavn").val(),
+                    etternavn: $("#etternavn").val(),
+                    antall: $("#antall").val(),
+                    film: $("#film").val(),
+                    telefonnr: $("#telefonnr").val(),
+                    epost: $("#epost").val(),
+                };
+                $.post("/lagreBillett", billett, function () {
+                    hentAlle(billett);
+                });
+
+            }
+
+
+
+
+
+
+        }
+
+        function hentAlle() {
+            $.get("/hentAlle", function (data) {
+                formaterData(data);
+            })
+
+        }
+        console.log();
+
+        function formaterData(billett) {
+            let ut = "<table> <tr> <th>Fornavn</th> <th>Etternavn</th> <th>Antall</th>"
+                +"<th>Film</th><th>Telefonnummer</th> <th>Epost</th> </tr>"
+
+
+            for (const enbillett of billett) {
+                ut +="<tr><td>" + enbillett.fornavn + "</td><td>" + enbillett.etternavn + "</td><td>" + enbillett.antall + "</td>" +
+                    "<td>" + enbillett.film +"</td>" + "<td>" + enbillett.telefonnr+ "</td><td>" + enbillett.epost + "</td></tr>";
+            }
+            ut += "</table>";
+            $("#alleBilletter").html(ut);
+
+            $("#fornavn").val("");
+            $("#etternavn").val("");
+            $("#antall").val("");
+            $("#film").val("-1");
+            $("#telefonnr").val("");
+            $("#epost").val("");
+
+
+
+
+        }
+        function slettAlle() {
+            $.get("/slett",function (){
+                hentAlle();
+            })
+        }
+
+        function validerTelefonNr(telefonnr) {
+            if (!telefonnr.match(/^\d{8}$/)) {
+                return false;
+            }
+            return true;
+        }
+        function validerEpost(epost) {
+            if (!epost.match(/^\S+@\S+\.\S+$/)) {
+                return false;
+            }
+            return true;
+        }
+
+    </script>
+</head>
+<body>
+<h2>Bestilling av kinobiletter</h2>
+
+<div id="filmFeil"></div>
+<p> <label for="film">Velg film</label>
+    <select id="film">
+        <option value="-1">Velg film</option>
+        <option value="Iron man">Iron man</option>
+        <option value="Spiderman">Spiderman</option>
+        <option value="Inception">Inception</option>
+        <option value="Interstellar">Interstellar</option>
+    </select>
+</p>
+<div>
+    <p id="antallFeil"></p>
+    Antall: <input type="number" id="antall">
+    <br>
+    <p id="fornavnFeil"></p>
+    Fornavn: <input type="text" id="fornavn">
+    <br>
+    <p id="etternavnFeil"></p>
+    Etternavn: <input type="text" id="etternavn">
+    <br>
+    <p id="epostFeil"></p>
+    Epost: <input type="text" id="epost">
+    <br>
+    <p id="telefonFeil"></p>
+    Telefonnummer: <input type="text" id="telefonnr">
+    <br>
+</div>
+<div>
+    <button onclick="kjopBillett()">Kjøp Billett</button>
+</div>
+
+<div>
+    <button id="slett" onclick="slettAlle()">Slett alle</button>
+</div>
+<br>
+<div id="alleBilletter"></div>
+
+</body>
+</html>
